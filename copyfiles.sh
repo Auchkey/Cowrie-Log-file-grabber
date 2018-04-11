@@ -1,7 +1,7 @@
 #!/bin/bash
 # UP819474
 # DESCRIPTION OF WHAT THIS DOES HERE
-# TODO: get regex input from user, scan TTYlogs and put files with matched content in seperate directory for easy examination later.
+# TODO: get regex input from user, scan TTYlogs and put files with matched content in separate directory for easy examination later.
 
 userRegex=$*
 

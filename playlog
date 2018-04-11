@@ -57,7 +57,12 @@ def playlog(fd, settings):
                 if settings['colorify'] and color:
                     sys.stdout.write('\033[0m')
                     color = None
-                sys.stdout.flush()
+                try: sys.stdout.flush() # fixes stderr message for grep -q
+		except IOError:
+		    pass
+		try: sys.stderr.flush()
+		except IOError:
+		    pass
         elif str(tty) == str(currtty) and op == OP_CLOSE:
             break
 

@@ -1,9 +1,9 @@
 # Cowrie-Log-file-grabber
-For personal Cowrie setup only.
+**WIP**
 
-Bash script that uses regex to copy log files with contents matching the specified pattern.
 
-Currently accepts basic regex from the user to use against detected log files in the same directory. Doesn't do anything with them yet.
+Bash script that parses cowrie's specific TTY log files using the provided playlog.py file, with regex to match any patterns contained within. Any files containing a match may be moved or copied to another folder.
+
 
 Syntax:
 
@@ -21,13 +21,14 @@ Usage examples:
 
 The following example scans files containing 'Clare' or 'Claire' and moves them to 'myFolder':
 
-copyfiles -m myFolder "Clai?re"
+`copyfiles -m myFolder "Clai?re"`
 
 This will just output the names of files containing part of a ping sequence:
-copyfiles -v "icmp_seq=[0-9]{,3} ttl=[0-9]{,3}"
+
+`copyfiles -v "icmp_seq=[0-9]{,3} ttl=[0-9]{,3}"`
 
 
 
 **TO DO**
 
-Copy pattern matching files to a seperate directory.
+Allow matched files to be moved/copied elsewhere.

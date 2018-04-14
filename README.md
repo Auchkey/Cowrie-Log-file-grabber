@@ -1,23 +1,23 @@
 # Cowrie-Log-file-grabber
-**WIP**
+***WIP***
 
 
 Bash script that parses cowrie's specific TTY log files using the provided playlog.py file, with regex to match any patterns contained within. Any files containing a match may be moved or copied to another folder.
 
 
-Syntax:
+**Syntax:**
 
 copyfiles [-v] [{-c|-v} Foldername] ["Pattern"]
 
 
-Options:
+**Options:**
 
 -v | --verbose # Output files containing match to console (verbose mode).
 -m | --move    # Specify where to move matched files (cannot be used with -c | --move).
 -c | --copy    # Specify where to copy matched files (cannot be used with -m | --move).
 
 
-Usage examples:
+**Usage examples:**
 
 The following example scans files containing 'Clare' or 'Claire' and moves them to 'myFolder':
 
@@ -29,6 +29,6 @@ This will just output the names of files containing part of a ping sequence:
 
 
 
-**TO DO**
+***TO DO***
 
 Allow matched files to be moved/copied elsewhere.

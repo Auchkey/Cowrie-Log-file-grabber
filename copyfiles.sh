@@ -93,15 +93,14 @@ function playTTYLogFiles {
 	done
   if [ ${#matchedPatternArray[@]} -eq 0 ]; then #if empty
 		error_exit "No files containing a match for that pattern were detected."
+  else
+    printf "\nThe following files contained a match:\n"; printf '%s\n' "${matchedPatternArray[@]}"
   fi
 }
 
 
 # What to do with files containing a match
 function matchHandler {
-	if $verbose; then #Output list of matched file names
-		printf "\nThe following files contained a match:\n"; printf '%s\n' "${matchedPatternArray[@]}"
-	fi
   printf "\n${#matchedPatternArray[@]} file(s) containing a match were detected.\n"
   if [[ "$moveFlag" = "true" ]] || [[ "$copyFlag" = "true" ]]; then
     printf "\nPreparing to move/copy...\n"

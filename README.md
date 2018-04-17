@@ -13,7 +13,9 @@ copyfiles [-v] [{-c|-v} Foldername] ["Pattern"]
 **Options:**
 
 -v | --verbose # Output files containing match to console (verbose mode).
+
 -m | --move    # Specify where to move matched files (cannot be used with -c | --move).
+
 -c | --copy    # Specify where to copy matched files (cannot be used with -m | --move).
 
 
@@ -27,8 +29,3 @@ This will just output the names of files containing part of a ping sequence:
 
 `copyfiles -v "icmp_seq=[0-9]{,3} ttl=[0-9]{,3}"`
 
-
-
-***TO DO***
-
-Allow matched files to be moved/copied elsewhere.

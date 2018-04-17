@@ -103,7 +103,7 @@ function matchHandler {
 		printf "\nThe following files contained a match:\n"; printf '%s\n' "${matchedPatternArray[@]}"
 	fi
   printf "\n${#matchedPatternArray[@]} file(s) containing a match were detected.\n"
-  if [[ $moveFlag || $copyFlag ]]; then
+  if [[ "$moveFlag" = "true" ]] || [[ "$copyFlag" = "true" ]]; then
     printf "\nPreparing to move/copy...\n"
     if [ ! -d "$moveFolder" ]; then #If folder does not exist, create it
       mkdir $moveFolder || error_exit "Error: Permission needed to create that folder."
@@ -121,6 +121,8 @@ function matchHandler {
       done
         printf "Files were copied to folder $moveFolder\n" #if successful
     fi
+  else
+    exit 0;
   fi
 }
 

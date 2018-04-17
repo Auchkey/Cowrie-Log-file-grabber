@@ -118,8 +118,8 @@ function matchHandler {
     elif $copyFlag; then
       for matchedFiles in "${matchedPatternArray[@]}"; do
         cp $matchedFiles $moveFolder || error_exit "Unknown Error: Cannot copy to folder $moveFolder!"
-      printf "Files were copied to folder $moveFolder\n" #if successful
-    done
+      done
+        printf "Files were copied to folder $moveFolder\n" #if successful
     fi
   fi
 }

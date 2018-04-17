@@ -23,9 +23,9 @@ function usage {
   echo "copyfiles.sh [-v] [{-c|-v} Foldername] [\"Pattern\"]"
   echo ""
   echo "Options:"
-  echo "-v | --verbose # Output files containing match to console (verbose mode)."
-  echo "-m | --move    # Specify where to move matched files (cannot be used with -c | --move)."
-  echo "-c | --copy    # Specify where to copy matched files (cannot be used with -m | --move)."
+  echo "-v # Output files containing match to console (verbose mode)."
+  echo "-m # Specify where to move matched files (cannot be used with -c)."
+  echo "-c # Specify where to copy matched files (cannot be used with -m)."
   echo ""
   echo "Usage examples:"
   echo "The following example scans files containing 'Clare' or 'Claire' and moves them to 'myFolder':"
@@ -60,9 +60,7 @@ if [ -z "$1" ]; then #if no regex is provided
   usage
 else
 	userRegex=$1
-	#echo "$userRegex" #DEBUG
 fi
-#echo $moveFlag; echo $copyFlag #DEBUG
 if $moveFlag && $copyFlag; then #if somehow trying to use both move and copy flags
   error_exit "The options -m and -c cannot be used together!"
 fi
@@ -91,7 +89,6 @@ function playTTYLogFiles {
 		    printf "\nScanning file: $filename"
 		    printf "\nFile number: $[$i+1]\n"
       fi
-		#python playlog -m 0 $filename | egrep -Z "$userRegex" #DEBUG
 		python playlog -m 0 $filename | egrep -q "$userRegex" && matchedPatternArray+=( "$filename" ) #search for matching pattern in logs, add matched files to array
 	done
   if [ ${#matchedPatternArray[@]} -eq 0 ]; then #if empty
@@ -129,5 +126,3 @@ function matchHandler {
 
 #Try main functions, catch errors
 (getTTYLogFiles; playTTYLogFiles; matchHandler) || error_exit "Exiting: an error has occured."
-
-#printf "\nUser Input: $userRegex\n" #DEBUG

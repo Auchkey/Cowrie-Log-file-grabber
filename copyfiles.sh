@@ -1,9 +1,16 @@
 #!/bin/bash
 # UP819474
-# DESCRIPTION OF WHAT THIS DOES HERE
+#
+# Lists, copies or moves cowrie's tty log files which contents match a given regex input.
+# See 'usage' function for more information.
+#
+# The purpose of running the playlog python program is that because cowrie's tty
+# log files cannot normally be parsed otherwise (i.e. using cat, grep etc.)
+#
+# May extend usage to other files in the future.
 
 
-# Declaration of options
+# Initialisation of default options/flags
 verbose="false"
 moveFlag="false"
 copyFlag="false"
@@ -13,7 +20,7 @@ copyFlag="false"
 function usage {
   echo ""
   echo "Syntax:"
-  echo "copyfiles [-v] [{-c|-v} Foldername] [\"Pattern\"]"
+  echo "copyfiles.sh [-v] [{-c|-v} Foldername] [\"Pattern\"]"
   echo ""
   echo "Options:"
   echo "-v | --verbose # Output files containing match to console (verbose mode)."
@@ -25,11 +32,17 @@ function usage {
   echo "copyfiles -m myFolder \"Clai?re\""
   echo ""
 	echo "This will just output the names of files containing part of a ping sequence:"
-	echo "copyfiles -v \"icmp_seq=[0-9]{,3} ttl=[0-9]{,3}\""
+	echo "copyfiles.sh -v \"icmp_seq=[0-9]{,3} ttl=[0-9]{,3}\""
   echo ""
 	exit 1
 }
 
+# Boilerplate error handler from <https://stackoverflow.com/q/64786>
+function error_exit {
+	PROGNAME=$(basename $0) # Get program name
+	echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2 # stdout to stderr, print line number of error
+	exit 1
+}
 
 # Parameter handling
 while getopts 'm:c:v' flag; do
@@ -47,16 +60,16 @@ if [ -z "$1" ]; then #if no regex is provided
   usage
 else
 	userRegex=$1
-	echo "$userRegex"
+	#echo "$userRegex" #DEBUG
 fi
+#echo $moveFlag; echo $copyFlag #DEBUG
 if $moveFlag && $copyFlag; then #if somehow trying to use both move and copy flags
-  echo "$0: The options -m and -c cannot be used together!" 1>&2; exit 1
+  error_exit "The options -m and -c cannot be used together!"
 fi
 
 
 # Detect and place all valid TTY log files into an array
 function getTTYLogFiles {
-
 	TTYLogArray=() #declare array
 	while IFS= read -r line; do
 		TTYLogArray+=( "$line" ) #each line is a new array element
@@ -66,75 +79,55 @@ function getTTYLogFiles {
 	if [ $arraylength -eq 0 ]; then
 		error_exit "Error: no valid log files detected!"
 	fi
-
 }
 
 
 # Play detected TTY log files to find a match in contents
 function playTTYLogFiles {
-
 	matchedPatternArray=()
 	for (( i=0; i<${arraylength}; i++ )); do #step through array
 		filename=${TTYLogArray[$i]}
-		printf "\nFile name: $filename"
-		printf "\nFile number: $[$i+1]\n" #number starting at 1
+    if $verbose; then
+		    printf "\nScanning file: $filename"
+		    printf "\nFile number: $[$i+1]\n"
+      fi
 		#python playlog -m 0 $filename | egrep -Z "$userRegex" #DEBUG
 		python playlog -m 0 $filename | egrep -q "$userRegex" && matchedPatternArray+=( "$filename" ) #search for matching pattern in logs, add matched files to array
 	done
-
+  if [ ${#matchedPatternArray[@]} -eq 0 ]; then #if empty
+		error_exit "No files containing a match for that pattern were detected."
+  fi
 }
 
 
-# What to do with files contain a match
+# What to do with files containing a match
 function matchHandler {
-
-	if [ ${#matchedPatternArray[@]} -eq 0 ]; then #if empty
-		printf "\nThis should be empty:\n"; printf '%s\n' "${matchedPatternArray[@]}" #DEBUG
-		error_exit "No files containing a match for that pattern were detected. :("
-	else
-		printf "\n${#matchedPatternArray[@]} file(s) containing a match were detected.\n"
-		if $verbose; then
-			printf "\nThe following files contained a match:\n"; printf '%s\n' "${matchedPatternArray[@]}"
-		fi
+	if $verbose; then #Output list of matched file names
+		printf "\nThe following files contained a match:\n"; printf '%s\n' "${matchedPatternArray[@]}"
 	fi
-
+  printf "\n${#matchedPatternArray[@]} file(s) containing a match were detected.\n"
+  if [[ $moveFlag || $copyFlag ]]; then
+    printf "\nPreparing to move/copy...\n"
+    if [ ! -d "$moveFolder" ]; then #If folder does not exist, create it
+      mkdir $moveFolder || error_exit "Error: Permission needed to create that folder."
+    fi
+      # Copy the files
+    if $moveFlag; then
+      for matchedFiles in "${matchedPatternArray[@]}"; do
+        mv $matchedFiles $moveFolder || error_exit "Unknown Error: Cannot move to folder $moveFolder!"
+      done
+      printf "Files were moved to folder $moveFolder\n" #if successful
+    # Move the files
+    elif $copyFlag; then
+      for matchedFiles in "${matchedPatternArray[@]}"; do
+        cp $matchedFiles $moveFolder || error_exit "Unknown Error: Cannot copy to folder $moveFolder!"
+      printf "Files were copied to folder $moveFolder\n" #if successful
+    done
+    fi
+  fi
 }
 
-
-# Boilerplate error "handler" from <https://stackoverflow.com/q/64786>
-function error_exit {
-
-	PROGNAME=$(basename $0) # Get program name
-	echo "${PROGNAME}: ${1:-"Unknown Error"}" 1>&2 # stdout to stderr
-	exit 1
-
-}
-
-
+#Try main functions, catch errors
 (getTTYLogFiles; playTTYLogFiles; matchHandler) || error_exit "Exiting: an error has occured."
 
-printf "\n\nUser Input: $userRegex\n" #DEBUG
-
-# NOTES FOR LATER REFERENCE
-
-# Note that certain input for egrep need an escape character: i.e. a comma: \,
-
-# grep -H "pattern" "file" = return file name of matched string
-
-# grep -z "pattern" = output all text with matching patterns highlighted
-
-# grep -q "pattern" = no output, only exit code.
-
-# xargs grep -H "text" = as above
-
-# Must use playlog as .log files are not in format parsable with tools like cat
-
-# ? tests exit code of last command (0 for success, 1 for failure) (i.e. echo $?)
-
-# $0, $1, $2 etc. = positional parameters
-# i.e. ./script.sh Hello world
-# $0 = script.sh
-# $1 = Hello
-# $2 = world
-
-# python playlog -m 0 ${TTYLogArray[$i]} | grep -q "$userRegex" # play logs with no input delay
+#printf "\nUser Input: $userRegex\n" #DEBUG

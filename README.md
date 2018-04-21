@@ -1,5 +1,4 @@
-# Cowrie-Log-file-grabber
-***WIP***
+# Cowrie TTY Log Parser Script
 
 
 Bash script that parses cowrie's specific TTY log files using the provided playlog.py file, with regex to match any patterns contained within. Any files containing a match may be moved or copied to another folder.
